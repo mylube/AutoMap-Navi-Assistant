@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_main_navigation_box"
+    android:minWidth="200dp"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp"
+    android:paddingEnd="5dp"
+    android:paddingStart="10dp">
+
+    <ImageView
+        android:id="@+id/iv_action_icon_min"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="centerInside"
+        android:src="@mipmap/ic_navi_u_turn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_distance_num_min"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:includeFontPadding="false"
+        android:text="283"
+        android:textColor="#FFFFFF"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_action_icon_min"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_distance_unit_min"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginBottom="4dp"
+        android:text="米"
+        android:textColor="#BBFFFFFF"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_distance_num_min"
+        app:layout_constraintStart_toEndOf="@+id/tv_distance_num_min" />
+
+    <View
+        android:id="@+id/navi_min_divider"
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="12dp"
+        android:background="#33FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv_distance_unit_min"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_road_name_min"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:ellipsize="marquee"
+        android:maxLines="1"
+        android:maxWidth="200dp"
+        android:text="居里夫人大道"
+        android:textColor="#FFFFFF"
+        android:textSize="30sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/navi_min_divider"
+        app:layout_constraintTop_toTopOf="parent" />
+    <include
+
+        layout="@layout/layout_floating_traffic_light_group"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginStart="12dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv_road_name_min"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

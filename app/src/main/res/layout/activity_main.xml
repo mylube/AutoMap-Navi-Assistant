@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5"
+    android:padding="15dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="悬浮窗个性化设置"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#111111"
+            android:layout_marginBottom="32dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="导航悬浮窗样式"
+            android:textColor="#333333"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <RadioGroup
+            android:id="@+id/rg_navi_style"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rb_style_standard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="常规模式"
+                android:textColor="#333333"
+                android:buttonTint="#00FA9A"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/rb_style_minimal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="极简模式"
+                android:textColor="#333333"
+                android:buttonTint="#00FA9A" />
+        </RadioGroup>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="主题风格"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="12dp"/>
+
+        <RadioGroup
+            android:id="@+id/rg_theme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp">
+
+            <RadioButton
+                android:id="@+id/rb_theme_dark"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="#333333"
+                android:buttonTint="#00FA9A"
+                android:textSize="14sp"
+                android:text="暗夜黑" />
+
+            <RadioButton
+                android:id="@+id/rb_theme_blue"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="#333333"
+                android:buttonTint="#00FA9A"
+                android:textSize="14sp"
+                android:text="科技蓝" />
+
+            <RadioButton
+                android:id="@+id/rb_theme_orange"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="#333333"
+                android:buttonTint="#00FA9A"
+                android:textSize="14sp"
+                android:text="橘子海" />
+
+            <RadioButton
+                android:id="@+id/rb_theme_purple"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="#333333"
+                android:buttonTint="#00FA9A"
+                android:textSize="14sp"
+                android:text="极光紫" />
+
+            <RadioButton
+                android:id="@+id/rb_theme_red"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="#333333"
+                android:buttonTint="#00FA9A"
+                android:textSize="14sp"
+                android:text="竞速红" />
+
+            <RadioButton
+                android:id="@+id/rb_theme_green"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="#333333"
+                android:buttonTint="#00FA9A"
+                android:textSize="14sp"
+                android:text="深林青" />
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="悬浮窗整体缩放"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="12dp"/>
+        <SeekBar
+            android:id="@+id/sb_window_size"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="35"
+            android:progressTint="#00FA9A"
+            android:thumbTint="#00FA9A"
+            android:layout_marginBottom="40dp"/>
+
+        <Button
+            android:visibility="gone"
+            android:id="@+id/btn_toggle_service"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="保存并重启预览"
+            android:textSize="18sp"
+            android:backgroundTint="#00FA9A"
+            android:textColor="#000000"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+</ScrollView>
