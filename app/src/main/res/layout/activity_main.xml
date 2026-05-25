@@ -129,14 +129,30 @@
                 android:text="深林青" />
         </RadioGroup>
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="悬浮窗整体缩放"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_marginBottom="12dp"/>
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="悬浮窗整体缩放"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#333333" />
+
+            <TextView
+                android:id="@+id/tv_scale_percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="35%"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#00FA9A" />
+        </LinearLayout>
         <SeekBar
             android:id="@+id/sb_window_size"
             android:layout_width="match_parent"

@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         RadioGroup rgTheme = findViewById(R.id.rg_theme);
         SeekBar sbWindowSize = findViewById(R.id.sb_window_size);
+        TextView tvScalePercent = findViewById(R.id.tv_scale_percent);
         Button btnToggle = findViewById(R.id.btn_toggle_service);
 
 
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
         rgTheme.check(prefs.getInt("theme_id", R.id.rb_theme_dark));
         sbWindowSize.setProgress(prefs.getInt("window_size", 35));
+        tvScalePercent.setText(sbWindowSize.getProgress() + "%");
         Log.d(TAG, "initSettingView: prefs"+sbWindowSize.getProgress());
         rgTheme.setOnCheckedChangeListener((group, checkedId) -> {
             prefs.edit().putInt("theme_id", checkedId).apply();
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         sbWindowSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tvScalePercent.setText(progress + "%");
                 if (fromUser) {
                     prefs.edit().putInt("window_size", progress).apply();
                     sendBroadcast(new Intent(ACTION_UPDATE_SETTINGS));

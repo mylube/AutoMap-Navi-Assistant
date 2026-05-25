@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -121,6 +122,8 @@ public class AmapNaviReceiver extends BroadcastReceiver {
                     FloatingNaviService.instance.updateNaviInfo(
                             disNum, disUnit, actionStr, nextRoadName, summaryStr, etaText, progressPercentage, icon,String.valueOf(curSpeed),cameraDist
                     );
+                }else {
+                    Toast.makeText(context,"服务未启动",Toast.LENGTH_SHORT).show();
                 }
 
 

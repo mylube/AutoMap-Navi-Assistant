@@ -2,6 +2,9 @@ package com.shadow.automap;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -41,6 +44,30 @@ public class FloatingNaviService extends Service {
     private static final int LAYOUT_NAVI_MINIMAL = 1;
     private static final int LAYOUT_CRUISE = 2;
     private int currentLayoutType = -1;
+
+    // 前台服务通知
+    private static final int NOTIFICATION_ID = 1001;
+    private static final String CHANNEL_ID = "navi_foreground";
+
+    // 红绿灯方向常量
+    private static final int DIR_LEFT = 1;
+    private static final int DIR_RIGHT = 2;
+    private static final int DIR_U_TURN = 3;
+    private static final int DIR_STRAIGHT = 4;
+    private static final int DIR_NONE = 0;
+
+    // 导航数据缓存（解决布局切换时的数据丢失）
+    private NaviDataCache lastNaviData;
+    private LightDataCache lastLightData;
+
+    private static class NaviDataCache {
+        String disNum, disUnit, actionStr, roadName, summaryStr, etaStr, speed;
+        int progressPercentage, turnIconId, cameraDist;
+    }
+
+    private static class LightDataCache {
+        int status, seconds, dir;
+    }
 
     // UI 组件引用
     private TextView tvDistanceNum, tvDistanceUnit, tvAction, tvRoadName, tvCruiseSpeed, tvSummary, tvEta, tvLightTime,tvCameraWarning,tvCameraDesc;
@@ -97,6 +124,9 @@ public class FloatingNaviService extends Service {
 
         IntentFilter filter = new IntentFilter("com.shadow.automap.UPDATE_SETTINGS");
         registerReceiver(settingsReceiver, filter);
+
+        createNotificationChannel();
+        startForeground(NOTIFICATION_ID, buildNotification());
     }
 
     private void initLayoutParams() {
@@ -125,29 +155,34 @@ public class FloatingNaviService extends Service {
         if (currentLayoutType == targetType && floatingView != null) return;
         currentLayoutType = targetType;
 
-        mainHandler.post(() -> {
-            if (floatingView != null) windowManager.removeView(floatingView);
+        // 清理红绿灯看门狗和闪烁动画，防止旧回调影响新布局
+        lightWatchdogHandler.removeCallbacksAndMessages(null);
+        handleBlinkAnimation(false);
 
-            int layoutRes = (targetType == LAYOUT_CRUISE) ? R.layout.layout_floating_cruise :
-                    (targetType == LAYOUT_NAVI_MINIMAL ? R.layout.layout_floating_navi_minimal : R.layout.layout_floating_navi);
+        if (floatingView != null) windowManager.removeView(floatingView);
 
-            floatingView = LayoutInflater.from(this).inflate(layoutRes, null);
-            rebindViewReferences();
-            setupInteractions();
-            applySettings();
-            windowManager.addView(floatingView, layoutParams);
-            floatingView.setVisibility(View.GONE);
-        });
+        int layoutRes = (targetType == LAYOUT_CRUISE) ? R.layout.layout_floating_cruise :
+                (targetType == LAYOUT_NAVI_MINIMAL ? R.layout.layout_floating_navi_minimal : R.layout.layout_floating_navi);
+
+        floatingView = LayoutInflater.from(this).inflate(layoutRes, null);
+        rebindViewReferences();
+        setupInteractions();
+        applySettings();
+        windowManager.addView(floatingView, layoutParams);
+        floatingView.setVisibility(View.GONE);
+
+        // 布局切换后从缓存恢复数据
+        if (lastNaviData != null) applyNaviData(lastNaviData);
+        if (lastLightData != null) applyLightData(lastLightData);
     }
 
     private void applySettings() {
         if (floatingView == null) return;
 
-        int windowProgress = prefs.getInt("window_size", 50);
-        float scale = 0.5f + (windowProgress / 100.0f);
-        float finalScale = Math.min(scale, 1.0f);
-        floatingView.setScaleX(finalScale);
-        floatingView.setScaleY(finalScale);
+        int windowProgress = prefs.getInt("window_size", 35);
+        float scale = 0.5f + (windowProgress / 100.0f) * 0.5f;
+        floatingView.setScaleX(scale);
+        floatingView.setScaleY(scale);
         floatingView.setPivotX(0);
         floatingView.setPivotY(0);
 
@@ -235,50 +270,73 @@ public class FloatingNaviService extends Service {
         }
     };
 
-    public void updateNaviInfo(String disNum, String disUnit, String actionStr, String roadName, String summaryStr, String etaStr, int progressPercentage, int turnIconId,String speed,int cameraDist) {
+    public void updateNaviInfo(String disNum, String disUnit, String actionStr, String roadName, String summaryStr, String etaStr, int progressPercentage, int turnIconId, String speed, int cameraDist) {
+        if (floatingView == null) {
+            Toast.makeText(this, "布局未初始化", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 1. 缓存数据（布局切换时自动从缓存恢复）
+        lastNaviData = new NaviDataCache();
+        lastNaviData.disNum = disNum;
+        lastNaviData.disUnit = disUnit;
+        lastNaviData.actionStr = actionStr;
+        lastNaviData.roadName = roadName;
+        lastNaviData.summaryStr = summaryStr;
+        lastNaviData.etaStr = etaStr;
+        lastNaviData.progressPercentage = progressPercentage;
+        lastNaviData.turnIconId = turnIconId;
+        lastNaviData.speed = speed;
+        lastNaviData.cameraDist = cameraDist;
+
+        // 2. 确保布局正确（同步切换，不再 post 异步）
+        switchLayoutIfNeeded(turnIconId == 0 ? 0 : 1);
+
+        // 3. 将数据应用到当前视图
+        applyNaviData(lastNaviData);
+
+        // 4. 重启看门狗
+        mainHandler.removeCallbacks(hideMainRunnable);
+        mainHandler.postDelayed(hideMainRunnable, MAIN_TIMEOUT_MS);
+    }
+
+    private void applyNaviData(NaviDataCache data) {
         if (floatingView == null) return;
 
-//        if (floatingView.getVisibility() != View.VISIBLE && Integer.parseInt(speed)>0) {
-//            floatingView.setVisibility(View.VISIBLE);
-//        }
+        // 先处理可见性
         if (floatingView.getVisibility() != View.VISIBLE) {
-            if (turnIconId != 0) {
+            if (data.turnIconId != 0) {
                 // 导航态：有剩余距离就显示
-                if (!"0".equals(disNum)) floatingView.setVisibility(View.VISIBLE);
+                if (!"0".equals(data.disNum)) floatingView.setVisibility(View.VISIBLE);
             } else {
-                // 巡航态：只要收到速度广播就显示（哪怕车速是0）
+                // 巡航态：只要收到数据就显示
                 floatingView.setVisibility(View.VISIBLE);
             }
         }
-        switchLayoutIfNeeded(turnIconId == 0 ? 0 : 1);
 
         if (currentLayoutType == LAYOUT_CRUISE) {
-            if (tvCruiseSpeed != null) tvCruiseSpeed.setText(speed);
-            if (tvRoadName != null) tvRoadName.setText(roadName);
-            if (tvCameraWarning!=null &&tvCameraDesc !=null){
-                if (cameraDist >0) {
-                    tvCameraWarning.setText(String.valueOf(cameraDist));
+            if (tvCruiseSpeed != null) tvCruiseSpeed.setText(data.speed);
+            if (tvRoadName != null) tvRoadName.setText(data.roadName);
+            if (tvCameraWarning != null && tvCameraDesc != null) {
+                if (data.cameraDist > 0) {
+                    tvCameraWarning.setText(String.valueOf(data.cameraDist));
                     tvCameraWarning.setVisibility(View.VISIBLE);
                     tvCameraDesc.setVisibility(View.VISIBLE);
-                }else {
-
+                } else {
                     tvCameraWarning.setVisibility(View.GONE);
                     tvCameraDesc.setVisibility(View.GONE);
                 }
             }
         } else {
-            if (tvDistanceNum != null) tvDistanceNum.setText(disNum);
-            if (tvDistanceUnit != null) tvDistanceUnit.setText(disUnit);
-            if (tvAction != null) tvAction.setText(actionStr);
-            if (tvRoadName != null) tvRoadName.setText(roadName);
-            if (tvSummary != null) tvSummary.setText(summaryStr);
-            if (tvEta != null) tvEta.setText(etaStr);
-            if (pbRoute != null) pbRoute.setProgress(progressPercentage);
-            updateTurnIcon(turnIconId);
+            if (tvDistanceNum != null) tvDistanceNum.setText(data.disNum);
+            if (tvDistanceUnit != null) tvDistanceUnit.setText(data.disUnit);
+            if (tvAction != null) tvAction.setText(data.actionStr);
+            if (tvRoadName != null) tvRoadName.setText(data.roadName);
+            if (tvSummary != null) tvSummary.setText(data.summaryStr);
+            if (tvEta != null) tvEta.setText(data.etaStr);
+            if (pbRoute != null) pbRoute.setProgress(data.progressPercentage);
+            updateTurnIcon(data.turnIconId);
         }
-
-        mainHandler.removeCallbacks(hideMainRunnable);
-        mainHandler.postDelayed(hideMainRunnable, MAIN_TIMEOUT_MS);
     }
 
     private void updateTurnIcon(int iconId) {
@@ -303,23 +361,35 @@ public class FloatingNaviService extends Service {
     public void updateTrafficLight(int status, int seconds, int dir) {
         if (floatingView == null || llTrafficLightGroup == null) return;
 
-        if (seconds <= 0 && status != 1 && status != 4) {
+        // 缓存数据
+        lastLightData = new LightDataCache();
+        lastLightData.status = status;
+        lastLightData.seconds = seconds;
+        lastLightData.dir = dir;
+
+        applyLightData(lastLightData);
+    }
+
+    private void applyLightData(LightDataCache data) {
+        if (floatingView == null || llTrafficLightGroup == null) return;
+
+        if (data.seconds <= 0 && data.status != 1 && data.status != 4) {
             llTrafficLightGroup.setVisibility(View.GONE);
             handleBlinkAnimation(false);
             return;
         }
 
         llTrafficLightGroup.setVisibility(View.VISIBLE);
-        if (tvLightTime != null) tvLightTime.setText(seconds > 0 ? String.valueOf(seconds) : "");
+        if (tvLightTime != null) tvLightTime.setText(data.seconds > 0 ? String.valueOf(data.seconds) : "");
 
         if (ivLightArrow != null) {
-            if (dir == 4) ivLightArrow.setImageResource(R.mipmap.ic_navi_straight);
-            else if (dir == 1) ivLightArrow.setImageResource(R.mipmap.ic_navi_left);
-            else if (dir == 3) ivLightArrow.setImageResource(R.mipmap.ic_navi_u_turn);
-            ivLightArrow.setVisibility(dir == 0 ? View.GONE : View.VISIBLE);
+            if (data.dir == DIR_STRAIGHT) ivLightArrow.setImageResource(R.mipmap.ic_navi_straight);
+            else if (data.dir == DIR_LEFT) ivLightArrow.setImageResource(R.mipmap.ic_navi_left);
+            else if (data.dir == DIR_U_TURN) ivLightArrow.setImageResource(R.mipmap.ic_navi_u_turn);
+            ivLightArrow.setVisibility(data.dir == DIR_NONE ? View.GONE : View.VISIBLE);
         }
 
-        switch (status) {
+        switch (data.status) {
             case 1:
                 ivLightIcon.setImageResource(R.mipmap.icon_red);
                 if (tvLightTime != null) tvLightTime.setTextColor(Color.parseColor("#FF4D4D"));
@@ -328,16 +398,18 @@ public class FloatingNaviService extends Service {
             case 4:
                 ivLightIcon.setImageResource(R.mipmap.icon_green);
                 if (tvLightTime != null) tvLightTime.setTextColor(Color.parseColor("#00FA9A"));
-                handleBlinkAnimation(seconds > 0 && seconds <= 3);
+                handleBlinkAnimation(data.seconds > 0 && data.seconds <= 3);
                 break;
             default:
                 ivLightIcon.setImageResource(R.mipmap.icon_yellow);
-                if (tvLightTime != null) tvLightTime.setTextColor(Color.parseColor("#ebb537")); tvLightTime.setText("注意");
+                if (tvLightTime != null) {
+                    tvLightTime.setTextColor(Color.parseColor("#ebb537"));
+                    tvLightTime.setText("注意");
+                }
                 handleBlinkAnimation(false);
                 break;
         }
 
-        // 🔥 修复：使用专属的 lightWatchdogHandler
         lightWatchdogHandler.removeCallbacks(hideLightRunnable);
         lightWatchdogHandler.postDelayed(hideLightRunnable, LIGHT_TIMEOUT_MS);
     }
@@ -357,6 +429,34 @@ public class FloatingNaviService extends Service {
             }
             if (llTrafficLightGroup != null) llTrafficLightGroup.setAlpha(1f);
         }
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "导航悬浮窗",
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            channel.setDescription("用于保持导航悬浮窗前台服务运行");
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) manager.createNotificationChannel(channel);
+        }
+    }
+
+    private Notification buildNotification() {
+        Notification.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = new Notification.Builder(this, CHANNEL_ID);
+        } else {
+            builder = new Notification.Builder(this);
+        }
+        return builder
+                .setContentTitle("AutoMap 导航辅助")
+                .setContentText("悬浮窗运行中")
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setOngoing(true)
+                .build();
     }
 
     private void registerNaviReceiver() {
