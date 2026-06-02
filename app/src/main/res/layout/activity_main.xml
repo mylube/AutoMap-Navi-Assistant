@@ -1,178 +1,230 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"
-    android:padding="15dp">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#1A1A2E">
+
+    <!-- 标题 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="高德地图悬浮窗设置"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 悬浮窗开关 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="启用悬浮窗"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <Switch
+            android:id="@+id/sw_enable_float"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- 缩放比例 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="悬浮窗缩放比例"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <SeekBar
+            android:id="@+id/sb_scale"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:max="200" />
+
+        <TextView
+            android:id="@+id/tv_scale_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="100%"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- 悬浮窗背景透明度 -->
+    <TextView
+        android:id="@+id/tv_window_alpha_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="悬浮窗背景透明度"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <SeekBar
+            android:id="@+id/sb_window_alpha"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:max="100" />
+
+        <TextView
+            android:id="@+id/tv_window_alpha_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="80%"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- 红绿灯背景透明度 -->
+    <TextView
+        android:id="@+id/tv_light_bg_alpha_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="红绿灯背景透明度"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <SeekBar
+            android:id="@+id/sb_light_bg_alpha"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:max="100" />
+
+        <TextView
+            android:id="@+id/tv_light_bg_alpha_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="20%"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- 主题颜色 -->
+    <LinearLayout
+        android:id="@+id/ll_theme_colors"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="24dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="悬浮窗个性化设置"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="#111111"
-            android:layout_marginBottom="32dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="导航悬浮窗样式"
-            android:textColor="#333333"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <RadioGroup
-            android:id="@+id/rg_navi_style"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
-
-            <RadioButton
-                android:id="@+id/rb_style_standard"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="常规模式"
-                android:textColor="#333333"
-                android:buttonTint="#00FA9A"
-                android:checked="true" />
-
-            <RadioButton
-                android:id="@+id/rb_style_minimal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="极简模式"
-                android:textColor="#333333"
-                android:buttonTint="#00FA9A" />
-        </RadioGroup>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="主题风格"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_marginBottom="12dp"/>
-
-        <RadioGroup
-            android:id="@+id/rg_theme"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="32dp">
-
-            <RadioButton
-                android:id="@+id/rb_theme_dark"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:textColor="#333333"
-                android:buttonTint="#00FA9A"
-                android:textSize="14sp"
-                android:text="暗夜黑" />
-
-            <RadioButton
-                android:id="@+id/rb_theme_blue"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:textColor="#333333"
-                android:buttonTint="#00FA9A"
-                android:textSize="14sp"
-                android:text="科技蓝" />
-
-            <RadioButton
-                android:id="@+id/rb_theme_orange"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:textColor="#333333"
-                android:buttonTint="#00FA9A"
-                android:textSize="14sp"
-                android:text="橘子海" />
-
-            <RadioButton
-                android:id="@+id/rb_theme_purple"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:textColor="#333333"
-                android:buttonTint="#00FA9A"
-                android:textSize="14sp"
-                android:text="极光紫" />
-
-            <RadioButton
-                android:id="@+id/rb_theme_red"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:textColor="#333333"
-                android:buttonTint="#00FA9A"
-                android:textSize="14sp"
-                android:text="竞速红" />
-
-            <RadioButton
-                android:id="@+id/rb_theme_green"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:textColor="#333333"
-                android:buttonTint="#00FA9A"
-                android:textSize="14sp"
-                android:text="深林青" />
-        </RadioGroup>
+            android:text="主题颜色"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+            android:layout_marginTop="8dp">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="悬浮窗整体缩放"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#333333" />
+            <View
+                android:id="@+id/v_color_red"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#FF4444"
+                android:layout_marginEnd="8dp" />
 
-            <TextView
-                android:id="@+id/tv_scale_percent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="35%"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#00FA9A" />
+            <View
+                android:id="@+id/v_color_green"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#44FF44"
+                android:layout_marginEnd="8dp" />
+
+            <View
+                android:id="@+id/v_color_blue"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#4444FF"
+                android:layout_marginEnd="8dp" />
+
+            <View
+                android:id="@+id/v_color_yellow"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#FFFF44" />
         </LinearLayout>
-        <SeekBar
-            android:id="@+id/sb_window_size"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="35"
-            android:progressTint="#00FA9A"
-            android:thumbTint="#00FA9A"
-            android:layout_marginBottom="40dp"/>
+    </LinearLayout>
+
+    <!-- 位置设置 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="悬浮窗位置"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
 
         <Button
-            android:visibility="gone"
-            android:id="@+id/btn_toggle_service"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="保存并重启预览"
-            android:textSize="18sp"
-            android:backgroundTint="#00FA9A"
-            android:textColor="#000000"
-            android:textStyle="bold" />
+            android:id="@+id/btn_pos_left"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="左侧"
+            android:layout_marginEnd="4dp" />
 
+        <Button
+            android:id="@+id/btn_pos_right"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="右侧"
+            android:layout_marginStart="4dp" />
     </LinearLayout>
-</ScrollView>
+
+    <!-- 保存按钮 -->
+    <Button
+        android:id="@+id/btn_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="保存设置"
+        android:textSize="16sp" />
+
+</LinearLayout>
